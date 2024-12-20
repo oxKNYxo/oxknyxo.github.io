@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>條碼掃描器</title>
+    <link rel="stylesheet" href="style.css"> <!-- 引用 style.css -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+    <h1>條碼掃描器</h1>
+    <div id="camera"></div>
+    <button id="start-camera">開啟相機掃描</button>
+    <div id="output">
+        掃描結果：<span id="result">尚未掃描</span>
+    </div>
+    <div id="error-message">條碼不符合要求（以C、F或H開頭）。</div>
+
+    <!-- 表格顯示條碼資訊 -->
+    <table id="barcode-table">
+        <thead>
+            <tr>
+                <th>商品條碼</th>
+                <th>價格</th>
+                <th>數量</th>
+                <th>小記</th>
+                <th>新條碼</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 條碼資料會在這裡新增 -->
+        </tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td id="total-cell"></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <script src="script.js"></script>
+</body>
+</html>
