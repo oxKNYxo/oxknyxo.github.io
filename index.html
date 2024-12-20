@@ -1,1 +1,33 @@
-hello world!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>oxKNYxo</title>
+    <style>
+        #jw_barcode_scanner {
+            display: block;
+            margin: 20px auto; /* 置中 */
+            padding: 15px 30px; /* 大小 */
+            font-size: 18px; /* 字體大小 */
+            background-color: #007bff; /* 背景色 */
+            color: white; /* 字體顏色 */
+            border: none;
+            border-radius: 5px; /* 圓角 */
+            cursor: pointer;
+        }
+        #jw_barcode_scanner:hover {
+            background-color: #0056b3; /* 滑鼠懸停顏色 */
+        }
+    </style>
+</head>
+<body>
+    <button id="jw_barcode_scanner">匠丸扭蛋 條碼掃描</button>
+
+    <script type="text/javascript">
+        document.getElementById("jw_barcode_scanner").onclick = function () {
+            location.href = "jianwan_barcode/index.html";
+        };
+    </script>
+</body>
+</html>
