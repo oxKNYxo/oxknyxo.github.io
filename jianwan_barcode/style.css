@@ -22,6 +22,20 @@
 #start-camera:hover {
     background-color: #0056b3; /* 滑鼠懸停顏色 */
 }
+#start-camera.active {
+    display: block;
+    margin: 20px auto; /* 置中 */
+    padding: 15px 30px; /* 大小 */
+    font-size: 18px; /* 字體大小 */
+    background-color: #e6381e; /* 背景色 */
+    color: white; /* 字體顏色 */
+    border: none;
+    border-radius: 5px; /* 圓角 */
+    cursor: pointer;
+}
+#start-camera.active:hover {
+    background-color: #d33017; /* 滑鼠懸停顏色 */
+}
 
 #error-message {
     color: red;
