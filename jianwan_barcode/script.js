@@ -1,3 +1,59 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js"
+import { collection, doc, getDoc, getDocs, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js"; 
+
+
+const firebaseConfig = {
+    apiKey: "AIzaSyC5lDAG_chA4mkKQjtagfunUzKXTiu9Qwk",
+    authDomain: "jiawan-barcode.firebaseapp.com",
+    projectId: "jiawan-barcode",
+    storageBucket: "jiawan-barcode.firebasestorage.app",
+    messagingSenderId: "377251855826",
+    appId: "1:377251855826:web:3569849dce6eb4aaae9c0b",
+    measurementId: "G-XNL8WJV4ET"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+// Initialize Cloud Firestore and get a reference to the service
+const db = getFirestore(app);
+
+
+
+var checkout_date = new Date();
+checkout_date.setHours(checkout_date.getHours() + 8);
+document.getElementById("checkout_date").valueAsDate = checkout_date;
+checkout_date = $("#checkout_date").val();
+$("#checkout_date").change(async function () {
+    $("#barcode-table tbody tr").remove();
+    updateTotal();
+    checkout_date = $("#checkout_date").val();
+    let querySnapshot = await getDocs(collection(db, checkout_date));
+    querySnapshot.forEach((doc) => {
+        let data = doc.data();
+        let barcodeText = data.barcode + "\t\t+" + data.quantity;
+        console.log(doc.id, " => ", data);
+        addBarcodeToTable(doc.id, data.price, data.quantity);
+    });
+});
+
+
+
+let querySnapshot = await getDocs(collection(db, checkout_date));
+querySnapshot.forEach((doc) => {
+    let data = doc.data();
+    let barcodeText = data.barcode + "\t\t+" + data.quantity;
+    console.log(doc.id, " => ", data);
+    addBarcodeToTable(doc.id, data.price, data.quantity);
+});
+
+
+
+
+
 // 開啟相機按鈕功能
 function startCameraWithTimeout() {
     const startButton = document.getElementById('start-camera');
@@ -52,7 +108,7 @@ function startCameraWithTimeout() {
                 // const output = `${scannedBarcode} +${input}`; // 不再使用 \t，避免無效字符
 
                 // // 添加條碼到表格
-                // addBarcodeToTable(scannedBarcode, input, output);
+                // addBarcodeToTable(scannedBarcode, input);
             } else {
                 alert("請輸入有效的數字。");
             }
@@ -65,7 +121,9 @@ function startCameraWithTimeout() {
                 const output = `${scannedBarcode} +${input}`; // 不再使用 \t，避免無效字符
 
                 // 添加條碼到表格
-                addBarcodeToTable(scannedBarcode, price, input, output);
+                checkout_date = $("#checkout_date").val();
+                addData(checkout_date, scannedBarcode, price, input);
+                addBarcodeToTable(scannedBarcode, price, input);
             } else {
                 alert("請輸入有效的數字。");
             }
@@ -90,9 +148,28 @@ function startCameraWithTimeout() {
 startCameraWithTimeout();
 
 
+async function addData(date, barcode, price, quantity) {
+    let docRef = doc(db, date, barcode);
+    let docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+        let data = docSnap.data();
+        if (data.price != price) {
+            alert("已存在相同條碼，價格不同，無法新增資料。");
+            return;
+        }
+        quantity = parseInt(quantity) + parseInt(data.quantity);
+    }
+
+    await setDoc(doc(db, date, barcode), {
+        barcode: barcode,
+        price: parseInt(price),
+        quantity: parseInt(quantity),
+    });
+}
 
 // 將條碼添加到表格
-function addBarcodeToTable(originalBarcode, price, quantity, newBarcodeText) {
+function addBarcodeToTable(barcode, price, quantity) {
     const table = document.getElementById('barcode-table').getElementsByTagName('tbody')[0];
     const newRow = table.insertRow(table.rows.length); // 在表格中插入新行
 
@@ -105,7 +182,7 @@ function addBarcodeToTable(originalBarcode, price, quantity, newBarcodeText) {
     const actionCell = newRow.insertCell(5);
 
     // 填充單元格內容
-    barcodeCell.textContent = originalBarcode;
+    barcodeCell.textContent = barcode;
 
     // 創建數字輸入框
     const priceInput = document.createElement('input');
@@ -113,7 +190,7 @@ function addBarcodeToTable(originalBarcode, price, quantity, newBarcodeText) {
     priceInput.value = price;
     priceInput.style.width = '60px';
     priceInput.addEventListener('change', function() {
-        updateBarcode(newRow, originalBarcode, priceInput.value, quantityInput.value);
+        updateBarcode(newRow, barcode, priceInput.value, quantityInput.value);
     });
     priceCell.appendChild(priceInput);
 
@@ -123,7 +200,7 @@ function addBarcodeToTable(originalBarcode, price, quantity, newBarcodeText) {
     quantityInput.value = quantity;
     quantityInput.style.width = '60px';
     quantityInput.addEventListener('change', function() {
-        updateBarcode(newRow, originalBarcode, priceInput.value, quantityInput.value);
+        updateBarcode(newRow, barcode, priceInput.value, quantityInput.value);
     });
     quantityCell.appendChild(quantityInput);
 
@@ -135,7 +212,7 @@ function addBarcodeToTable(originalBarcode, price, quantity, newBarcodeText) {
 
     // 創建條碼圖片
     const barcodeImage = document.createElement('img');
-    JsBarcode(barcodeImage, newBarcodeText, {
+    JsBarcode(barcodeImage, barcode+'\t\t+'+quantity, {
         format: "CODE128",
         lineColor: "#000000",
         width: 1.5, // 條碼寬度
@@ -148,8 +225,12 @@ function addBarcodeToTable(originalBarcode, price, quantity, newBarcodeText) {
     const deleteButton = document.createElement('button');
     deleteButton.textContent = '刪除';
     deleteButton.style.margin = '5px';
-    deleteButton.addEventListener('click', function() {
-        table.deleteRow(newRow.rowIndex - 1);
+    deleteButton.addEventListener('click', async function() {
+        if (window.confirm('確定刪除？')) {
+            table.deleteRow(newRow.rowIndex - 1);
+            checkout_date = $("#checkout_date").val();
+            await deleteDoc(doc(db, checkout_date, barcode));
+            updateTotal();}
     });
     actionCell.appendChild(deleteButton);
 
@@ -157,7 +238,7 @@ function addBarcodeToTable(originalBarcode, price, quantity, newBarcodeText) {
 }
 
 // 更新條碼
-function updateBarcode(row, originalBarcode, price, quantity) {
+async function updateBarcode(row, barcode, price, quantity) {
     // 創建小記文字
     const subtotalCell = row.cells[3];
     subtotalCell.innerHTML = ''; // 清空原有內容
@@ -166,7 +247,7 @@ function updateBarcode(row, originalBarcode, price, quantity) {
     subtotalText.style.margin = '5px';
     subtotalCell.appendChild(subtotalText);
 
-    const newBarcodeText = `${originalBarcode} +${quantity}`;
+    const newBarcodeText = `${barcode}\t\t+${quantity}`;
 
     // 更新條碼圖片
     const barcodeImageCell = row.cells[4];
@@ -180,6 +261,13 @@ function updateBarcode(row, originalBarcode, price, quantity) {
         displayValue: true // 顯示條碼文字
     });
     barcodeImageCell.appendChild(newBarcodeImage);
+
+    checkout_date = $("#checkout_date").val();
+    await setDoc(doc(db, checkout_date, barcode), {
+        barcode: barcode,
+        price: parseInt(price),
+        quantity: parseInt(quantity),
+    });
 
     updateTotal();
 }
