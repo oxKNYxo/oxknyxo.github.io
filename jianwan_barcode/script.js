@@ -52,6 +52,8 @@ querySnapshot.forEach((doc) => {
 
 
 
+let openCam = false;
+
 
 
 // 開啟相機按鈕功能
@@ -81,7 +83,11 @@ function startCameraWithTimeout() {
 
             // 設定10秒超時
             timeoutHandle = setTimeout(() => {
+                startButton.textContent = '開啟相機';
+                startButton.classList.remove('active');
+                openCam = false;
                 Quagga.stop();
+                clearTimeout(timeoutHandle);
                 alert('未掃描到條碼，關閉相機。');
             }, 10000);
         });
@@ -141,7 +147,20 @@ function startCameraWithTimeout() {
 
 
     // 點擊按鈕初始化相機
-    startButton.addEventListener('click', initQuagga);
+    startButton.addEventListener('click', function() {
+        if (!openCam) {
+            startButton.textContent = '關閉相機';
+            startButton.classList.add('active');
+            openCam = true;
+            initQuagga();
+        } else {
+            startButton.textContent = '開啟相機';
+            startButton.classList.remove('active');
+            openCam = false;
+            clearTimeout(timeoutHandle);
+            Quagga.stop();
+        }
+    });
 }
 
 // 初始化按鈕功能
