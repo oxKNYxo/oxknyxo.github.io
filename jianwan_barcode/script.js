@@ -54,6 +54,7 @@ querySnapshot.forEach((doc) => {
 
 let openCam = false;
 
+startCamera(0);
 
 function startCamera(deviceId, customConstraints = null) {
     openCam = true;
