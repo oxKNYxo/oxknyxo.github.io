@@ -343,5 +343,6 @@ function updateTotal() {
 // 獲取攝像頭設備清單
 async function getCameras() {
     const devices = await navigator.mediaDevices.enumerateDevices();
+    alert(devices.filter(device => device.kind === 'videoinput')[0].label);
     return devices.filter(device => device.kind === 'videoinput');
 }
