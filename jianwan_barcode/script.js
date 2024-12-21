@@ -55,42 +55,75 @@ querySnapshot.forEach((doc) => {
 let openCam = false;
 
 
+function startCamera(deviceId, customConstraints = null) {
+    openCam = true;
+    
+    const constraints = customConstraints || {
+        deviceId: { exact: deviceId }
+    };
+    
+    // 初始化 Quagga
+    Quagga.init({
+        inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector('#camera'), // 渲染到該元素
+            constraints: constraints
+        },
+        decoder: {
+            readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // 支援的條碼格式
+        }
+    }, function (err) {
+        if (err) {
+            console.error(err);
+            alert('初始化失敗，請檢查相機權限或設備。');
+            return;
+        }
+        console.log("初始化成功");
+        Quagga.start();
 
+        // 設定10秒超時
+        timeoutHandle = setTimeout(() => {
+            startButton.textContent = '開啟相機';
+            startButton.classList.remove('active');
+            openCam = false;
+            Quagga.stop();
+            clearTimeout(timeoutHandle);
+            alert('未掃描到條碼，關閉相機。');
+        }, 10000);
+    });
+}
 // 開啟相機按鈕功能
-function startCameraWithTimeout() {
+async function startCameraWithTimeout() {
     const startButton = document.getElementById('start-camera');
     let timeoutHandle;
 
-    // 初始化 Quagga
-    function initQuagga() {
-        Quagga.init({
-            inputStream: {
-                name: "Live",
-                type: "LiveStream",
-                target: document.querySelector('#camera'), // 渲染到該元素
-            },
-            decoder: {
-                readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // 支援的條碼格式
-            }
-        }, function (err) {
-            if (err) {
-                console.error(err);
-                alert('初始化失敗，請檢查相機權限或設備。');
-                return;
-            }
-            console.log("初始化成功");
-            Quagga.start();
+    const cameras = await getCameras();
+    const cameraSelect = document.getElementById('camera-select');
 
-            // 設定10秒超時
-            timeoutHandle = setTimeout(() => {
-                startButton.textContent = '開啟相機';
-                startButton.classList.remove('active');
-                openCam = false;
-                Quagga.stop();
-                clearTimeout(timeoutHandle);
-                alert('未掃描到條碼，關閉相機。');
-            }, 10000);
-        });
+    if (cameras.length === 0) {
+        alert('未檢測到可用的攝像頭');
+        return;
+    }
+
+    // 填充選項
+    cameras.forEach((camera, index) => {
+        const option = document.createElement('option');
+        option.value = camera.deviceId;
+        option.textContent = camera.label || `Camera ${index + 1}`;
+        cameraSelect.appendChild(option);
+    });
+
+    // 添加事件監聽器，切換鏡頭
+    cameraSelect.addEventListener('change', () => {
+        const selectedDeviceId = cameraSelect.value;
+        startCamera(selectedDeviceId);
+    });
+
+    // 預設選擇第一個設備
+    if (cameras.length > 0) {
+        cameraSelect.value = cameras[0].deviceId;
+        startCamera(cameras[0].deviceId);
     }
 
     // 條碼掃描成功後的處理
@@ -151,8 +184,7 @@ function startCameraWithTimeout() {
         if (!openCam) {
             startButton.textContent = '關閉相機';
             startButton.classList.add('active');
-            openCam = true;
-            initQuagga();
+            startCamera();
         } else {
             startButton.textContent = '開啟相機';
             startButton.classList.remove('active');
@@ -314,36 +346,3 @@ async function getCameras() {
     const devices = await navigator.mediaDevices.enumerateDevices();
     return devices.filter(device => device.kind === 'videoinput');
 }
-
-// 動態生成攝像頭選單
-async function setupCameraSelection() {
-    const cameras = await getCameras();
-    const cameraSelect = document.getElementById('camera-select');
-
-    if (cameras.length === 0) {
-        alert('未檢測到可用的攝像頭');
-        return;
-    }
-
-    // 填充選項
-    cameras.forEach((camera, index) => {
-        const option = document.createElement('option');
-        option.value = camera.deviceId;
-        option.textContent = camera.label || `Camera ${index + 1}`;
-        cameraSelect.appendChild(option);
-    });
-
-    // 添加事件監聽器，切換鏡頭
-    cameraSelect.addEventListener('change', () => {
-        const selectedDeviceId = cameraSelect.value;
-        startCamera(selectedDeviceId);
-    });
-
-    // 預設選擇第一個設備
-    if (cameras.length > 0) {
-        cameraSelect.value = cameras[0].deviceId;
-        startCamera(cameras[0].deviceId);
-    }
-}
-
-setupCameraSelection();
