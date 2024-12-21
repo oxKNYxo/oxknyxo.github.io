@@ -28,9 +28,9 @@ checkout_date.setHours(checkout_date.getHours() + 8);
 document.getElementById("checkout_date").valueAsDate = checkout_date;
 checkout_date = $("#checkout_date").val();
 $("#checkout_date").change(async function () {
+    checkout_date = $("#checkout_date").val();
     $("#barcode-table tbody tr").remove();
     updateTotal();
-    checkout_date = $("#checkout_date").val();
     let querySnapshot = await getDocs(collection(db, checkout_date));
     querySnapshot.forEach((doc) => {
         let data = doc.data();
@@ -52,16 +52,102 @@ querySnapshot.forEach((doc) => {
 
 
 
-let openCam = false;
+let isCameraRunnung = false;
 
-startCamera(0);
 
-function startCamera(deviceId, customConstraints = null) {
-    openCam = true;
+
+const startButton = document.getElementById('start-camera');
+let timeoutHandle;
+
+const cameras = await getCameras();
+const cameraSelect = document.getElementById('camera-select');
+
+if (cameras.length === 0) {
+    alert('未檢測到可用的攝像頭');
+} else {
+    // 填充選項
+    cameras.forEach((camera, index) => {
+        const option = document.createElement('option');
+        option.value = camera.deviceId;
+        option.textContent = camera.label || `Camera ${index + 1}`;
+        cameraSelect.appendChild(option);
+    });
     
-    const constraints = customConstraints || {
-        deviceId: { exact: deviceId }
-    };
+    // 添加事件監聽器，切換鏡頭
+    cameraSelect.addEventListener('change', () => {
+        const selectedDeviceId = cameraSelect.value;
+        startCamera(selectedDeviceId);
+    });
+    
+    // 預設選擇第一個設備
+    if (cameras.length > 0) {
+        cameraSelect.value = cameras[0].deviceId;
+        startCamera(cameras[0].deviceId);
+    }
+}
+
+// 條碼掃描成功後的處理
+Quagga.onDetected(function(data) {
+    const scannedBarcode = data.codeResult.code;
+    document.getElementById('result').textContent = scannedBarcode; // 顯示條碼內容
+    console.log('條碼掃描成功:', scannedBarcode);
+
+    // 判斷條碼是否以 C、F 或 H 開頭
+    if (scannedBarcode.match(/^[CFH]/)) {
+        Quagga.stop();
+        // 隱藏錯誤訊息
+        document.getElementById('error-message').style.display = 'none';
+
+        // 彈出輸入框，預設為數字 1，僅允許數字輸入
+        const price = prompt("請輸入價錢：", "0");
+
+        // 確保用戶有輸入且是有效的數字
+        if (price !== null && /^[0-9]+$/.test(price)) { // 驗證是否為數字
+            // const output = `${scannedBarcode} +${input}`; // 不再使用 \t，避免無效字符
+
+            // // 添加條碼到表格
+            // addBarcodeToTable(scannedBarcode, input);
+        } else {
+            alert("請輸入有效的數字。");
+        }
+
+        // 彈出輸入框，預設為數字 1，僅允許數字輸入
+        const input = prompt("請輸入數量：", "1");
+
+        // 確保用戶有輸入且是有效的數字
+        if (input !== null && /^[0-9]+$/.test(input)) { // 驗證是否為數字
+            const output = `${scannedBarcode} +${input}`; // 不再使用 \t，避免無效字符
+
+            // 添加條碼到表格
+            addData(checkout_date, scannedBarcode, price, input);
+            addBarcodeToTable(scannedBarcode, price, input);
+        } else {
+            alert("請輸入有效的數字。");
+        }
+    } else {
+        // 顯示錯誤訊息
+        const errorMessage = document.getElementById('error-message');
+        errorMessage.style.display = 'block'; // 顯示錯誤訊息
+
+        // 在1秒後隱藏錯誤訊息
+        setTimeout(function() {
+            errorMessage.style.display = 'none';
+        }, 1000); // 1秒後隱藏
+    }
+});
+
+
+// 當 Quagga 停止時的回調
+Quagga.onStop = function() {
+    clearTimeout(timeoutHandle);
+    isCameraRunnung = false;
+    startButton.textContent = '開啟相機';
+    startButton.classList.remove('active');
+    console.log("Quagga 停止掃描");
+};
+
+function startCamera(deviceId) {
+    isCameraRunnung = true;
     
     // 初始化 Quagga
     Quagga.init({
@@ -69,7 +155,9 @@ function startCamera(deviceId, customConstraints = null) {
             name: "Live",
             type: "LiveStream",
             target: document.querySelector('#camera'), // 渲染到該元素
-            constraints: constraints
+            constraints: {
+                deviceId: deviceId
+            }
         },
         decoder: {
             readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // 支援的條碼格式
@@ -85,119 +173,29 @@ function startCamera(deviceId, customConstraints = null) {
 
         // 設定10秒超時
         timeoutHandle = setTimeout(() => {
-            startButton.textContent = '開啟相機';
-            startButton.classList.remove('active');
-            openCam = false;
             Quagga.stop();
-            clearTimeout(timeoutHandle);
             alert('未掃描到條碼，關閉相機。');
         }, 10000);
     });
 }
-// 開啟相機按鈕功能
-async function startCameraWithTimeout() {
-    const startButton = document.getElementById('start-camera');
-    let timeoutHandle;
 
-    const cameras = await getCameras();
-    const cameraSelect = document.getElementById('camera-select');
 
-    if (cameras.length === 0) {
-        alert('未檢測到可用的攝像頭');
-        return;
+
+// 點擊按鈕初始化相機
+startButton.addEventListener('click', function() {
+    if (!isCameraRunnung) {
+        startButton.textContent = '關閉相機';
+        startButton.classList.add('active');
+        startCamera();
+    } else {
+        startButton.textContent = '開啟相機';
+        startButton.classList.remove('active');
+        isCameraRunnung = false;
+        clearTimeout(timeoutHandle);
+        Quagga.stop();
     }
+});
 
-    // 填充選項
-    cameras.forEach((camera, index) => {
-        const option = document.createElement('option');
-        option.value = camera.deviceId;
-        option.textContent = camera.label || `Camera ${index + 1}`;
-        cameraSelect.appendChild(option);
-    });
-
-    // 添加事件監聽器，切換鏡頭
-    cameraSelect.addEventListener('change', () => {
-        const selectedDeviceId = cameraSelect.value;
-        startCamera(selectedDeviceId);
-    });
-
-    // 預設選擇第一個設備
-    if (cameras.length > 0) {
-        cameraSelect.value = cameras[0].deviceId;
-        startCamera(cameras[0].deviceId);
-    }
-
-    // 條碼掃描成功後的處理
-    Quagga.onDetected(function(data) {
-        const scannedBarcode = data.codeResult.code;
-        document.getElementById('result').textContent = scannedBarcode; // 顯示條碼內容
-        console.log('條碼掃描成功:', scannedBarcode);
-
-        // 判斷條碼是否以 C、F 或 H 開頭
-        if (scannedBarcode.match(/^[CFH]/)) {
-            Quagga.stop();
-            clearTimeout(timeoutHandle);
-            // 隱藏錯誤訊息
-            document.getElementById('error-message').style.display = 'none';
-
-            // 彈出輸入框，預設為數字 1，僅允許數字輸入
-            const price = prompt("請輸入價錢：", "0");
-
-            // 確保用戶有輸入且是有效的數字
-            if (price !== null && /^[0-9]+$/.test(price)) { // 驗證是否為數字
-                // const output = `${scannedBarcode} +${input}`; // 不再使用 \t，避免無效字符
-
-                // // 添加條碼到表格
-                // addBarcodeToTable(scannedBarcode, input);
-            } else {
-                alert("請輸入有效的數字。");
-            }
-
-            // 彈出輸入框，預設為數字 1，僅允許數字輸入
-            const input = prompt("請輸入數量：", "1");
-
-            // 確保用戶有輸入且是有效的數字
-            if (input !== null && /^[0-9]+$/.test(input)) { // 驗證是否為數字
-                const output = `${scannedBarcode} +${input}`; // 不再使用 \t，避免無效字符
-
-                // 添加條碼到表格
-                checkout_date = $("#checkout_date").val();
-                addData(checkout_date, scannedBarcode, price, input);
-                addBarcodeToTable(scannedBarcode, price, input);
-            } else {
-                alert("請輸入有效的數字。");
-            }
-        } else {
-            // 顯示錯誤訊息
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.style.display = 'block'; // 顯示錯誤訊息
-
-            // 在1秒後隱藏錯誤訊息
-            setTimeout(function() {
-                errorMessage.style.display = 'none';
-            }, 1000); // 1秒後隱藏
-        }
-    });
-
-
-    // 點擊按鈕初始化相機
-    startButton.addEventListener('click', function() {
-        if (!openCam) {
-            startButton.textContent = '關閉相機';
-            startButton.classList.add('active');
-            startCamera();
-        } else {
-            startButton.textContent = '開啟相機';
-            startButton.classList.remove('active');
-            openCam = false;
-            clearTimeout(timeoutHandle);
-            Quagga.stop();
-        }
-    });
-}
-
-// 初始化按鈕功能
-startCameraWithTimeout();
 
 
 async function addData(date, barcode, price, quantity) {
@@ -280,7 +278,6 @@ function addBarcodeToTable(barcode, price, quantity) {
     deleteButton.addEventListener('click', async function() {
         if (window.confirm('確定刪除？')) {
             table.deleteRow(newRow.rowIndex - 1);
-            checkout_date = $("#checkout_date").val();
             await deleteDoc(doc(db, checkout_date, barcode));
             updateTotal();}
     });
@@ -314,7 +311,6 @@ async function updateBarcode(row, barcode, price, quantity) {
     });
     barcodeImageCell.appendChild(newBarcodeImage);
 
-    checkout_date = $("#checkout_date").val();
     await setDoc(doc(db, checkout_date, barcode), {
         barcode: barcode,
         price: parseInt(price),
