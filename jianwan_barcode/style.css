@@ -8,6 +8,10 @@
     overflow: hidden;
 }
 
+#camera-selection-container {
+    margin: 20px auto;
+}
+
 #start-camera {
     display: block;
     margin: 20px auto; /* 置中 */
@@ -71,4 +75,10 @@ th, td {
 
 th {
     background-color: #f4f4f4;
+}
+
+#result {
+    margin: 20px 0;
+    font-size: 18px;
+    color: #333;
 }

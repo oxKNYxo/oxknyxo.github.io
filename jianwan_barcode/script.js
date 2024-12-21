@@ -67,7 +67,12 @@ function startCameraWithTimeout() {
             inputStream: {
                 name: "Live",
                 type: "LiveStream",
-                target: document.querySelector('#camera') // 渲染到該元素
+                target: document.querySelector('#camera'), // 渲染到該元素
+                constraints: {
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    facingMode: "environment"
+                }
             },
             decoder: {
                 readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // 支援的條碼格式
@@ -305,3 +310,37 @@ function updateTotal() {
     const totalCell = document.getElementById('total-cell');
     totalCell.textContent = total;
 }
+
+// 獲取攝像頭設備清單
+async function getCameras() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return devices.filter(device => device.kind === 'videoinput');
+}
+
+// 動態生成攝像頭選單
+async function setupCameraSelection() {
+    const cameras = await getCameras();
+    const cameraSelect = document.getElementById('camera-select');
+
+    // 填充選項
+    cameras.forEach((camera, index) => {
+        const option = document.createElement('option');
+        option.value = camera.deviceId;
+        option.textContent = camera.label || `Camera ${index + 1}`;
+        cameraSelect.appendChild(option);
+    });
+
+    // 添加事件監聽器，切換鏡頭
+    cameraSelect.addEventListener('change', () => {
+        const selectedDeviceId = cameraSelect.value;
+        startCamera(selectedDeviceId);
+    });
+
+    // 預設選擇第一個設備
+    if (cameras.length > 0) {
+        cameraSelect.value = cameras[0].deviceId;
+        startCamera(cameras[0].deviceId);
+    }
+}
+
+setupCameraSelection();
