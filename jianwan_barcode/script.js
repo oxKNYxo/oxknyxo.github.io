@@ -75,8 +75,7 @@ if (cameras.length === 0) {
     
     // 添加事件監聽器，切換鏡頭
     cameraSelect.addEventListener('change', () => {
-        const selectedDeviceId = cameraSelect.value;
-        startCamera(selectedDeviceId);
+        startCamera(cameraSelect.value);
     });
     
     // 預設選擇第一個設備
@@ -186,7 +185,7 @@ startButton.addEventListener('click', function() {
     if (!isCameraRunnung) {
         startButton.textContent = '關閉相機';
         startButton.classList.add('active');
-        startCamera();
+        startCamera(cameraSelect.value);
     } else {
         startButton.textContent = '開啟相機';
         startButton.classList.remove('active');
