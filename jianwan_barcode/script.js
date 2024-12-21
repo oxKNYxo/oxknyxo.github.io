@@ -59,6 +59,9 @@ let isCameraRunnung = false;
 const startButton = document.getElementById('start-camera');
 let timeoutHandle;
 
+startCamera();
+Quagga.stop();
+
 const cameras = await getCameras();
 const cameraSelect = document.getElementById('camera-select');
 
