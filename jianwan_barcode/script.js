@@ -68,11 +68,6 @@ function startCameraWithTimeout() {
                 name: "Live",
                 type: "LiveStream",
                 target: document.querySelector('#camera'), // 渲染到該元素
-                constraints: {
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 },
-                    facingMode: "environment"
-                }
             },
             decoder: {
                 readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // 支援的條碼格式
@@ -311,6 +306,9 @@ function updateTotal() {
     totalCell.textContent = total;
 }
 
+
+
+
 // 獲取攝像頭設備清單
 async function getCameras() {
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -321,6 +319,11 @@ async function getCameras() {
 async function setupCameraSelection() {
     const cameras = await getCameras();
     const cameraSelect = document.getElementById('camera-select');
+
+    if (cameras.length === 0) {
+        alert('未檢測到可用的攝像頭');
+        return;
+    }
 
     // 填充選項
     cameras.forEach((camera, index) => {
