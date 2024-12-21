@@ -79,10 +79,10 @@ if (cameras.length === 0) {
     });
     
     // 預設選擇第一個設備
-    if (cameras.length > 0) {
-        cameraSelect.value = cameras[0].deviceId;
-        startCamera(cameras[0].deviceId);
-    }
+    // if (cameras.length > 0) {
+    //     cameraSelect.value = cameras[0].deviceId;
+    //     startCamera(cameras[0].deviceId);
+    // }
 }
 
 // 條碼掃描成功後的處理
@@ -146,6 +146,9 @@ Quagga.onStop = function() {
 };
 
 function startCamera(deviceId) {
+    if (isCameraRunnung) {
+        Quagga.stop();
+    }
     isCameraRunnung = true;
     
     // 初始化 Quagga
