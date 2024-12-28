@@ -31,7 +31,7 @@ const barcodeView = {
     displayValue: true
 }
 
-let openCam = false;
+let isCamActivated = false;
 
 
 
@@ -78,15 +78,15 @@ async function loadData(date) {
 // 相機按鈕設定
 function cameraBtnSetting() {
     $("#start_camera").click(function() {
-        if (!openCam) {
+        if (!isCamActivated) {
             $("#start_camera").text("關閉相機");
             $("#start_camera").addClass("active");
-            openCam = true;
+            isCamActivated = true;
             initQuagga();
         } else {
             $("#start_camera").text("開啟相機");
             $("#start_camera").removeClass("active");
-            openCam = false;
+            isCamActivated = false;
             Quagga.stop();
         }
     });
@@ -121,6 +121,7 @@ function initQuagga() {
 
         // 判斷條碼是否以 C、F 或 H 開頭
         if (scannedBarcode.match(/^[CFH]/)) {
+            isCamActivated = false;
             Quagga.stop();
             // 隱藏錯誤訊息
             $("#error_message").hide();
