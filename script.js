@@ -81,10 +81,12 @@ function cameraBtnSetting() {
         if (!openCam) {
             $("#start_camera").text("關閉相機");
             $("#start_camera").addClass("active");
+            openCam = true;
             initQuagga();
         } else {
             $("#start_camera").text("開啟相機");
-            $("#start_camera").removeClass.remove("active");
+            $("#start_camera").removeClass("active");
+            openCam = false;
             Quagga.stop();
         }
     });
@@ -111,15 +113,8 @@ function initQuagga() {
         Quagga.start();
     });
 
-    Quagga.onProcessed(function (result) {
-        openCam = true;
-
-    });
-
     // 條碼掃描成功後的處理
     Quagga.onDetected(function(data) {
-        openCam = false;
-
         let scannedBarcode = data.codeResult.code;
         $("#scanned_barcode").text(scannedBarcode); // 顯示條碼內容
         console.log("條碼掃描成功:", scannedBarcode);
