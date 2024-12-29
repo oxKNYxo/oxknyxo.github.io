@@ -40,7 +40,6 @@ init();
 function init() {
     initDate(8);
     initCamBtn();
-    initQuagga();
 }
 
 
@@ -104,6 +103,7 @@ function initQuagga() {
             return;
         }
         console.log("初始化成功");
+        Quagga.start();
     });
 
     // 條碼掃描成功後的處理
@@ -151,7 +151,7 @@ function startCam() {
     $("#start_camera").text("關閉相機");
     $("#start_camera").addClass("active");
     isCamActivated = true;
-    Quagga.start();
+    initQuagga();
 }
 
 // 關閉相機
