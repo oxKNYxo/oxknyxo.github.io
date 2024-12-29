@@ -40,6 +40,8 @@ init();
 function init() {
     initDate(8);
     initCamBtn();
+
+    loadData($("#checkout_date").val());
 }
 
 
@@ -118,16 +120,16 @@ function initQuagga() {
             // }
             stopCam();
 
-            // 彈出輸入框，預設為數字 0，僅允許數字輸入
-            let price = prompt("請輸入價錢：", "0");
+            // 彈出輸入框，僅允許數字輸入
+            let price = prompt("請輸入價錢：", "");
             // 確保用戶有輸入且是有效的數字
             if (price == null || !/^[0-9]+$/.test(price)) { // 空 或 非數字
                 alert("請輸入有效的數字。");
                 return;
             }
 
-            // 彈出輸入框，預設為數字 1，僅允許數字輸入
-            let quantity = prompt("請輸入數量：", "1");
+            // 彈出輸入框，僅允許數字輸入
+            let quantity = prompt("請輸入數量：", "");
             // 確保用戶有輸入且是有效的數字
             if (quantity == null || !/^[0-9]+$/.test(quantity)) {  // 空 或 非數字
                 alert("請輸入有效的數字。");
