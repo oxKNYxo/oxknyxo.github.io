@@ -12,7 +12,7 @@
     display: block;
     margin: 20px auto; /* 置中 */
     padding: 15px 30px; /* 大小 */
-    font-size: 18px; /* 字體大小 */
+    font-size: 14px; /* 字體大小 */
     background-color: #007bff; /* 背景色 */
     color: white; /* 字體顏色 */
     border: none;
@@ -26,7 +26,7 @@
     display: block;
     margin: 20px auto; /* 置中 */
     padding: 15px 30px; /* 大小 */
-    font-size: 18px; /* 字體大小 */
+    font-size: 14px; /* 字體大小 */
     background-color: #e6381e; /* 背景色 */
     color: white; /* 字體顏色 */
     border: none;
@@ -37,22 +37,33 @@
     background-color: #d33017; /* 滑鼠懸停顏色 */
 }
 
+#keep_activated {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+}
+#keep_activated_text {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+}
+
 #error_message {
     color: red;
-    font-size: 18px;
+    font-size: 14px;
     text-align: center;
     margin-top: 10px;
     display: none;
 }
 
 #output {
-    font-size: 18px;
+    font-size: 14px;
     margin-top: 10px;
     text-align: center;
 }
 
 #checkout_date {
-    font-size: 18px;
+    font-size: 14px;
     margin-top: 10px;
     text-align: center;
 }

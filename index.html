@@ -12,9 +12,13 @@
     <!-- <script src="firebase.js" type="module"></script> -->
 </head>
 <body>
-    <h1>條碼掃描器<span> (v1.1.2)</span></h1>
+    <h1>條碼掃描器<span> (v1.1.3)</span></h1>
     <div id="camera"></div>
-    <button id="start_camera">開啟相機</button>
+    <div style="text-align: center;">
+        <button id="start_camera">開啟相機</button>
+        <input type="checkbox" id="keep_activated" name="keep_activated">
+        <label id="keep_activated_text" for="keep_activated"> 保持相機開啟</label><br>
+    </div>
     <div id="output">
         掃描結果：<span id="scanned_barcode">尚未掃描</span>
     </div>
