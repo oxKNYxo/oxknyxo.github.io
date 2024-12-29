@@ -38,14 +38,15 @@ let isCamActivated = false;
 init();
 
 function init() {
-    dateSetting(8);
-    cameraBtnSetting();
+    initDate(8);
+    initCamBtn();
+    initQuagga();
 }
 
 
 
-// 日期設定
-function dateSetting(timeZone=0) {
+// 初始化 日期
+function initDate(timeZone=0) {
     let date = new Date();
     let day = date.getDate();
     let month = date.getMonth() + 1;
@@ -62,6 +63,7 @@ function dateSetting(timeZone=0) {
     });
 }
 
+// 載入資料
 async function loadData(date) {
     let querySnapshot = await getDocs(collection(db, date));
 
@@ -73,21 +75,13 @@ async function loadData(date) {
     });
 }
 
-
-
-// 相機按鈕設定
-function cameraBtnSetting() {
+// 初始化 相機按鈕
+function initCamBtn() {
     $("#start_camera").click(function() {
         if (!isCamActivated) {
-            $("#start_camera").text("關閉相機");
-            $("#start_camera").addClass("active");
-            isCamActivated = true;
-            initQuagga();
+            startCam();
         } else {
-            $("#start_camera").text("開啟相機");
-            $("#start_camera").removeClass("active");
-            isCamActivated = false;
-            Quagga.stop();
+            stopCam();
         }
     });
 }
@@ -110,7 +104,6 @@ function initQuagga() {
             return;
         }
         console.log("初始化成功");
-        Quagga.start();
     });
 
     // 條碼掃描成功後的處理
@@ -119,12 +112,8 @@ function initQuagga() {
         $("#scanned_barcode").text(scannedBarcode); // 顯示條碼內容
         console.log("條碼掃描成功:", scannedBarcode);
 
-        // 判斷條碼是否以 200000 開頭
-        if (scannedBarcode.match(/^200000/)) {
-            isCamActivated = false;
-            Quagga.stop();
-            // 隱藏錯誤訊息
-            $("#error_message").hide();
+        if (isMatch(scannedBarcode)) {
+            stopCam();
 
             // 彈出輸入框，預設為數字 0，僅允許數字輸入
             let price = prompt("請輸入價錢：", "0");
@@ -155,6 +144,24 @@ function initQuagga() {
             }, 1000); // 1秒後隱藏
         }
     });
+}
+
+// 開啟相機
+function startCam() {
+    $("#start_camera").text("關閉相機");
+    $("#start_camera").addClass("active");
+    isCamActivated = true;
+    Quagga.start();
+}
+
+// 關閉相機
+function stopCam() {
+    $("#start_camera").text("開啟相機");
+    $("#start_camera").removeClass("active");
+    isCamActivated = false;
+    Quagga.stop();
+    // 隱藏錯誤訊息
+    $("#error_message").hide();
 }
 
 // 添加條碼到資料庫
@@ -294,4 +301,10 @@ function updateTotal() {
 
     let totalCell = document.getElementById("total-cell");
     totalCell.textContent = total;
+}
+
+// 是否符合條件
+function isMatch(code) {
+    // 200000 開頭
+    return code.match(/^200000/);
 }
