@@ -113,9 +113,10 @@ function initQuagga() {
         console.log("條碼掃描成功:", scannedBarcode);
 
         if (isMatch(scannedBarcode)) {
-            if (!$("#keep_activated").prop("checked")) {
-                stopCam();
-            }
+            // if (!$("#keep_activated").prop("checked")) {
+            //     stopCam();
+            // }
+            stopCam();
 
             // 彈出輸入框，預設為數字 0，僅允許數字輸入
             let price = prompt("請輸入價錢：", "0");
