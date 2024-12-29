@@ -101,7 +101,7 @@ function initQuagga() {
             target: document.querySelector("#camera") // 渲染到該元素
         },
         decoder: {
-            readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // 支援的條碼格式
+            readers: ["ean_reader"] // 支援的條碼格式
         }
     }, function (err) {
         if (err) {
@@ -119,8 +119,8 @@ function initQuagga() {
         $("#scanned_barcode").text(scannedBarcode); // 顯示條碼內容
         console.log("條碼掃描成功:", scannedBarcode);
 
-        // 判斷條碼是否以 C、F 或 H 開頭
-        if (scannedBarcode.match(/^[CFH]/)) {
+        // 判斷條碼是否以 200000 開頭
+        if (scannedBarcode.match(/^200000/)) {
             isCamActivated = false;
             Quagga.stop();
             // 隱藏錯誤訊息
