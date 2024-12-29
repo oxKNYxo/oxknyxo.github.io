@@ -199,7 +199,7 @@ function addBarcodeToTable(barcode, price, quantity) {
     newRow.append(barcodeCell);
     
     // 價格單元格
-    let priceInput = $("<input>", {
+    let priceInput = $('<input type="number">', {
         type: "number",
         value: price,
         style: "width: 60px;",
@@ -211,7 +211,7 @@ function addBarcodeToTable(barcode, price, quantity) {
     newRow.append(priceCell);
     
     // 數量單元格
-    let quantityInput = $("<input>", {
+    let quantityInput = $('<input type="number">', {
         type: "number",
         value: quantity,
         style: "width: 60px;",
