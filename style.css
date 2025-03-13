@@ -1,72 +1,56 @@
-#camera {
-    width: 100%;
-    max-width: 600px;
-    height: 400px; /* 確保相機畫面有明確高度 */
-    margin: 0 auto;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    overflow: hidden;
+
+body {
+    font-size: 18px;
 }
 
-#start_camera {
+h1, h5 {
+    text-align: center;
+    margin: 0;
+}
+
+#inputDiv {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+#codePrefixBtnDiv, #priceBtnDiv {
+    display: flex;
+    flex-wrap: wrap; /* 超過寬度時換行 */;
+    align-items: center;
+}
+
+.codePrefixBtn, .priceBtn {
+    margin: 5px;
+}
+
+#submitBtn {
     display: block;
     margin: 20px auto; /* 置中 */
     padding: 15px 30px; /* 大小 */
-    font-size: 16pt; /* 字體大小 */
+    font-size: 18px; /* 字體大小 */
     background-color: #007bff; /* 背景色 */
     color: white; /* 字體顏色 */
     border: none;
     border-radius: 5px; /* 圓角 */
     cursor: pointer;
 }
-#start_camera:hover {
+#submitBtn:hover {
     background-color: #0056b3; /* 滑鼠懸停顏色 */
-}
-#start_camera.active {
-    display: block;
-    margin: 20px auto; /* 置中 */
-    padding: 15px 30px; /* 大小 */
-    font-size: 16pt; /* 字體大小 */
-    background-color: #e6381e; /* 背景色 */
-    color: white; /* 字體顏色 */
-    border: none;
-    border-radius: 5px; /* 圓角 */
-    cursor: pointer;
-}
-#start_camera.active:hover {
-    background-color: #d33017; /* 滑鼠懸停顏色 */
-}
-
-#keep_activated {
-    font-size: 16pt;
-    text-align: center;
-    margin-top: 10px;
-}
-#keep_activated_text {
-    font-size: 16pt;
-    text-align: center;
-    margin-top: 10px;
-}
-
-#error_message {
-    color: red;
-    font-size: 16pt;
-    text-align: center;
-    margin-top: 10px;
-    display: none;
 }
 
 #output {
-    font-size: 16pt;
+    font-size: 18px;
     margin-top: 10px;
     text-align: center;
 }
 
 #checkout_date {
-    font-size: 16pt;
+    font-size: 18px;
     margin-top: 10px;
     text-align: center;
-    width: auto;
 }
 
 table {

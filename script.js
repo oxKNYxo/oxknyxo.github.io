@@ -31,31 +31,61 @@ const barcodeView = {
     displayValue: true
 }
 
-let isCamActivated = false;
 
 
+let now = new Date();
+now.setHours(now.getHours() + 8); // 調整為 UTC+8
+let today = now.toISOString().split("T")[0]; // 轉換成 YYYY-MM-DD
+console.log(today);
 
 init();
 
 function init() {
-    initDate(8);
-    initCamBtn();
-
-    loadData($("#checkout_date").val());
+    resetInput();
+    dateSetting(8);
+    loadData(today);
 }
 
 
 
-// 初始化 日期
-function initDate(timeZone=0) {
-    let date = new Date();
-    let day = date.getDate();
-    let month = date.getMonth() + 1;
-    let year = date.getFullYear();
-    let currentDate = `${year}-${month}-${day}`;
-    console.log(currentDate);
+$(document).ready(function(){
+    $(".codePrefixBtn").on("click", function(){
+        let prefix = $(this).data("prefix"); // 取得 data-prefix 屬性的值
+        setPrefix(prefix);
+    });
 
-    $("#checkout_date").val(currentDate);
+    $(".priceBtn").on("click", function(){
+        let price = $(this).data("price"); // 取得 data-price 屬性的值
+        setPrice(price);
+    });
+
+    $("#submitBtn").on("click", function() {
+        let code = $("#codeInput").val();
+        let price = $("#priceInput").val();
+        let quantity = $("#quantityInput").val();
+        let date = $("#checkout_date").val();
+
+        console.log("code", code);
+        console.log("price", price);
+        console.log("quantity", quantity);
+        console.log("date", date);
+
+        submit(code, price, quantity);
+    })
+});
+
+
+function setPrefix(prefix) {
+    $("#codeInput").val(prefix); // 設定輸入框的值
+}
+function setPrice(price) {
+    $("#priceInput").val(price); // 設定輸入框的值
+}
+
+
+// 日期設定
+function dateSetting(timeZone=8) {
+    $("#checkout_date").val(today);
     
     $("#checkout_date").change(async function () {
         $("#barcode_table tbody tr").remove();
@@ -64,7 +94,6 @@ function initDate(timeZone=0) {
     });
 }
 
-// 載入資料
 async function loadData(date) {
     let querySnapshot = await getDocs(collection(db, date));
 
@@ -76,98 +105,20 @@ async function loadData(date) {
     });
 }
 
-// 初始化 相機按鈕
-function initCamBtn() {
-    $("#start_camera").click(function() {
-        if (!isCamActivated) {
-            startCam();
-        } else {
-            stopCam();
-        }
-    });
+
+
+function submit(barcode, price, quantity) {
+    addData(barcode, price, quantity);
+    addBarcodeToTable(barcode, price, quantity);
+    resetInput();
 }
 
-// 初始化 Quagga
-function initQuagga() {
-    Quagga.init({
-        inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector("#camera") // 渲染到該元素
-        },
-        decoder: {
-            readers: ["ean_reader"] // 支援的條碼格式
-        }
-    }, function (err) {
-        if (err) {
-            console.error(err);
-            alert("初始化失敗，請檢查相機權限或設備。");
-            return;
-        }
-        console.log("初始化成功");
-        Quagga.start();
-    });
-
-    // 條碼掃描成功後的處理
-    Quagga.onDetected(function(data) {
-        let scannedBarcode = data.codeResult.code;
-        $("#scanned_barcode").text(scannedBarcode); // 顯示條碼內容
-        console.log("條碼掃描成功:", scannedBarcode);
-
-        if (isMatch(scannedBarcode)) {
-            // if (!$("#keep_activated").prop("checked")) {
-            //     stopCam();
-            // }
-            stopCam();
-
-            // 彈出輸入框，僅允許數字輸入
-            let price = prompt("請輸入價錢：", "");
-            // 確保用戶有輸入且是有效的數字
-            if (price == null || !/^[0-9]+$/.test(price)) { // 空 或 非數字
-                alert("請輸入有效的數字。");
-                return;
-            }
-
-            // 彈出輸入框，僅允許數字輸入
-            let quantity = prompt("請輸入數量：", "");
-            // 確保用戶有輸入且是有效的數字
-            if (quantity == null || !/^[0-9]+$/.test(quantity)) {  // 空 或 非數字
-                alert("請輸入有效的數字。");
-                return;
-            }
-
-            // 添加條碼到資料庫
-            addData(scannedBarcode, price, quantity);
-            // 添加條碼到表格
-            addBarcodeToTable(scannedBarcode, price, quantity);
-        } else {
-            // 顯示錯誤訊息
-            $("#error_message").show(); // 顯示錯誤訊息
-            // 在1秒後隱藏錯誤訊息
-            setTimeout(function() {
-                $("#error_message").hide();
-            }, 1000); // 1秒後隱藏
-        }
-    });
+function resetInput() {
+    $("#codeInput").val()
+    $("#priceInput").val()
+    $("#quantityInput").val(1)
 }
 
-// 開啟相機
-function startCam() {
-    $("#start_camera").text("關閉相機");
-    $("#start_camera").addClass("active");
-    isCamActivated = true;
-    initQuagga();
-}
-
-// 關閉相機
-function stopCam() {
-    $("#start_camera").text("開啟相機");
-    $("#start_camera").removeClass("active");
-    isCamActivated = false;
-    Quagga.stop();
-    // 隱藏錯誤訊息
-    $("#error_message").hide();
-}
 
 // 添加條碼到資料庫
 async function addData(barcode, price, quantity) {
@@ -201,8 +152,8 @@ function addBarcodeToTable(barcode, price, quantity) {
     newRow.append(barcodeCell);
     
     // 價格單元格
-    let priceInput = $('<input>', {
-        type: "tel",
+    let priceInput = $("<input>", {
+        type: "number",
         value: price,
         style: "width: 60px;",
         change: function () {
@@ -213,8 +164,8 @@ function addBarcodeToTable(barcode, price, quantity) {
     newRow.append(priceCell);
     
     // 數量單元格
-    let quantityInput = $('<input>', {
-        type: "tel",
+    let quantityInput = $("<input>", {
+        type: "number",
         value: quantity,
         style: "width: 60px;",
         change: function () {
@@ -306,10 +257,4 @@ function updateTotal() {
 
     let totalCell = document.getElementById("total-cell");
     totalCell.textContent = total;
-}
-
-// 是否符合條件
-function isMatch(code) {
-    // 200000 開頭
-    return code.match(/^200000/);
 }

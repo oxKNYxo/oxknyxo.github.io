@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>條碼掃描器</title>
+    <title>匠丸達人 - 扭蛋登記</title>
     <link rel="stylesheet" href="style.css"> <!-- 引用 style.css -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
@@ -12,32 +12,58 @@
     <!-- <script src="firebase.js" type="module"></script> -->
 </head>
 <body>
-    <h1>條碼掃描器<span> (v1.3.4)</span></h1>
-    <div id="camera"></div>
-    <div style="text-align: center;">
-        <button id="start_camera">開啟相機</button>
-        <!-- <input type="checkbox" id="keep_activated" name="keep_activated"> -->
-        <!-- <label id="keep_activated_text" for="keep_activated"> 保持相機開啟</label><br> -->
-    </div>
-    <div id="output">
-        掃描結果：<span id="scanned_barcode">尚未掃描</span>
-    </div>
-    <div id="error_message">條碼不符合要求（以C、F或H開頭）。</div>
+    <h1>匠丸達人 - 扭蛋登記</h1>
+    <h5>v2.0.0</h5>
 
-    <div style="text-align: center;">
-        <label for="checkout_date">結帳日期:</label>
-        <input type="date" id="checkout_date" name="checkout_date">
-    </div>
+    <div id="inputDiv">
+        <div>
+            <div id="codePrefixBtnDiv">
+                <button type="button" class="codePrefixBtn" data-prefix="C01"> C01 </button>
+                <button type="button" class="codePrefixBtn" data-prefix="H001-0000"> H001-0000 </button>
+                <button type="button" class="codePrefixBtn" data-prefix="F002-0000"> F002-0000 </button>
+            </div>
+            <label>
+                條碼：
+                <input id="codeInput" type="tel" />
+            </label>
+        </div>
 
+        <div>
+            <div id="priceBtnDiv">
+                <button type="button" class="priceBtn" data-price="50"> 50 </button>
+                <button type="button" class="priceBtn" data-price="60"> 60 </button>
+                <button type="button" class="priceBtn" data-price="100"> 100 </button>
+                <button type="button" class="priceBtn" data-price="120"> 120 </button>
+                <button type="button" class="priceBtn" data-price="150"> 150 </button>
+            </div>
+            <label>
+                價格：
+                <input id="priceInput" type="tel" />
+            </label>
+        </div>
+
+        <label>
+            數量：
+            <input id="quantityInput" type="tel" />
+        </label>
+        
+        <div style="text-align: center;">
+            <label for="checkout_date">日期:</label>
+            <input type="date" id="checkout_date" name="checkout_date">
+        </div>
+        
+        <button type="button" id="submitBtn">送出</button>
+    </div>
+        
     <!-- 表格顯示條碼資訊 -->
     <table id="barcode_table">
         <thead>
             <tr>
-                <th>商品</th>
-                <th>價錢</th>
+                <th>商品條碼</th>
+                <th>價格</th>
                 <th>數量</th>
                 <th>小記</th>
-                <th>條碼</th>
+                <th>新條碼</th>
                 <th>操作</th>
             </tr>
         </thead>
