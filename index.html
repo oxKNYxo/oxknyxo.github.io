@@ -13,36 +13,39 @@
 </head>
 <body>
     <h1>匠丸達人 - 扭蛋登記</h1>
-    <h5>v2.0.0</h5>
+    <h5>v2.1.0</h5>
 
     <div id="inputDiv">
-        <div>
-            <div id="codePrefixBtnDiv">
-                <button type="button" class="codePrefixBtn" data-prefix="C01"> C01 </button>
-                <button type="button" class="codePrefixBtn" data-prefix="H001-0000"> H001-0000 </button>
-                <button type="button" class="codePrefixBtn" data-prefix="F002-0000"> F002-0000 </button>
-            </div>
-            <label>
-                條碼：
-                <input id="codeInput" type="tel" />
-            </label>
-        </div>
-
-        <div>
-            <div id="priceBtnDiv">
-                <button type="button" class="priceBtn" data-price="50"> 50 </button>
-                <button type="button" class="priceBtn" data-price="60"> 60 </button>
-                <button type="button" class="priceBtn" data-price="100"> 100 </button>
-                <button type="button" class="priceBtn" data-price="120"> 120 </button>
-                <button type="button" class="priceBtn" data-price="150"> 150 </button>
-            </div>
-            <label>
-                價格：
-                <input id="priceInput" type="tel" />
-            </label>
-        </div>
-
         <label>
+            條碼：
+            <input id="codeInput" type="tel" />
+        </label>
+        <div class="codePrefixBtnDiv">
+            <button type="button" class="codePrefixBtn" data-prefix="C01"> C010 </button>
+            <button type="button" class="codePrefixBtn" data-prefix="C01"> C011 </button>
+        </div>
+        <div class="codePrefixBtnDiv">
+            <button type="button" class="codePrefixBtn" data-prefix="H001-0000"> H001-0000 </button>
+            <button type="button" class="codePrefixBtn" data-prefix="H001-0000"> H002-0000 </button>
+        </div>
+        <div class="codePrefixBtnDiv">
+            <button type="button" class="codePrefixBtn" data-prefix="F002-0000"> F002-0000 </button>
+            <button type="button" class="codePrefixBtn" data-prefix="F002-0000"> F016-0000 </button>
+        </div>
+
+        <label style="margin-top: 20px;">
+            價格：
+            <input id="priceInput" type="tel" />
+        </label>
+        <div class="priceBtnDiv">
+            <button type="button" class="priceBtn" data-price="50"> 50 </button>
+            <button type="button" class="priceBtn" data-price="60"> 60 </button>
+            <button type="button" class="priceBtn" data-price="100"> 100 </button>
+            <button type="button" class="priceBtn" data-price="120"> 120 </button>
+            <button type="button" class="priceBtn" data-price="150"> 150 </button>
+        </div>
+
+        <label style="margin-top: 20px;">
             數量：
             <input id="quantityInput" type="tel" />
         </label>
