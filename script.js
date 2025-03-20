@@ -49,7 +49,7 @@ function init() {
 
 
 $(document).ready(function(){
-    $(".codePrefixBtn").on("click", function(){
+    $(".prefixBtn").on("click", function(){
         let prefix = $(this).data("prefix"); // 取得 data-prefix 屬性的值
         setPrefix(prefix);
     });
@@ -59,11 +59,16 @@ $(document).ready(function(){
         setPrice(price);
     });
 
+    $(".quantityBtn").on("click", function(){
+        let quantity = $(this).data("quantity"); // 取得 data-price 屬性的值
+        setQuantity(quantity);
+    });
+
     $("#submitBtn").on("click", function() {
         let code = $("#codeInput").val();
         let price = $("#priceInput").val();
         let quantity = $("#quantityInput").val();
-        let date = $("#checkout_date").val();
+        let date = $("#checkoutDate").val();
 
         console.log("code", code);
         console.log("price", price);
@@ -76,20 +81,23 @@ $(document).ready(function(){
 
 
 function setPrefix(prefix) {
-    $("#codeInput").val(prefix); // 設定輸入框的值
+    $("#codeInput").val(prefix);
 }
 function setPrice(price) {
-    $("#priceInput").val(price); // 設定輸入框的值
+    $("#priceInput").val(price);
+}
+function setQuantity(quantity) {
+    $("#quantityInput").val(quantity);
 }
 
 
 // 日期設定
 function dateSetting(timeZone=8) {
-    $("#checkout_date").val(today);
+    $("#checkoutDate").val(today);
     
-    $("#checkout_date").change(async function () {
-        $("#barcode_table tbody tr").remove();
-        await loadData($("#checkout_date").val());
+    $("#checkoutDate").change(async function () {
+        $("#barcodeTable tbody tr").remove();
+        await loadData($("#checkoutDate").val());
         updateTotal();
     });
 }
@@ -107,22 +115,50 @@ async function loadData(date) {
 
 
 
-function submit(barcode, price, quantity) {
-    addData(barcode, price, quantity);
-    addBarcodeToTable(barcode, price, quantity);
+function submit(code, price, quantity) {
+    if (!code) {
+        alert("請輸入編號", "danger");
+        return;
+    }
+    if (!price || isNaN(price)) {
+        alert("請輸入價格", "danger");
+        return;
+    }
+    if (!quantity || isNaN(quantity)) {
+        alert("請輸入數量", "danger");
+        return;
+    }
+    addData(code, price, quantity);
+    addBarcodeToTable(code, price, quantity);
+    alert(code+" 加入成功", "success");
     resetInput();
 }
 
 function resetInput() {
-    $("#codeInput").val()
-    $("#priceInput").val()
-    $("#quantityInput").val(1)
+    $("#codeInput").val("")
+    $("#priceInput").val("")
+    $("#quantityInput").val("")
+}
+
+function alert(message, type) {
+    var wrapper = document.createElement("div");
+    wrapper.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+
+    $("#alertPlaceholder").prepend(wrapper);
+    setTimeout(()=>{
+        document.getElementById('alertPlaceholder').lastChild.remove();
+    }, 3000);
 }
 
 
 // 添加條碼到資料庫
 async function addData(barcode, price, quantity) {
-    let date = $("#checkout_date").val();
+    let date = $("#checkoutDate").val();
     let docRef = doc(db, date, barcode);
     let docSnap = await getDoc(docRef);
     
@@ -146,7 +182,7 @@ async function addData(barcode, price, quantity) {
 // 將條碼添加到表格
 function addBarcodeToTable(barcode, price, quantity) {
     // 獲取表格的主體部分
-    let tableBody = $("#barcode_table tbody");
+    let tableBody = $("#barcodeTable tbody");
     let newRow = $("<tr></tr>");
     let barcodeCell = $("<td></td>").text(barcode);
     newRow.append(barcodeCell);
@@ -189,13 +225,13 @@ function addBarcodeToTable(barcode, price, quantity) {
     newRow.append(barcodeImageCell);
     
     // 操作單元格（刪除按鈕）
-    let deleteButton = $("<button></button>", {
+    let deleteButton = $(`<button></button>`, {
         text: "刪除",
-        style: "margin: 5px;",
+        class: "btn btn-danger",
         click: async function () {
             if (window.confirm("確定刪除？ 無法復原！")) {
                 newRow.remove();
-                let checkoutDate = $("#checkout_date").val();
+                let checkoutDate = $("#checkoutDate").val();
                 await deleteDoc(doc(db, checkoutDate, barcode));
                 updateTotal();
             }
@@ -205,7 +241,8 @@ function addBarcodeToTable(barcode, price, quantity) {
     newRow.append(actionCell);
     
     // 將新行添加到表格
-    tableBody.append(newRow);
+    tableBody.prepend(newRow);
+
     
     // 更新總計
     updateTotal();
@@ -232,7 +269,7 @@ async function updateBarcode(row, barcode, price, quantity) {
     barcodeImageCell.append(newBarcodeImage);
 
     // 更新數據庫中的條碼數據
-    let checkoutDate = $("#checkout_date").val(); // 獲取結帳日期
+    let checkoutDate = $("#checkoutDate").val(); // 獲取結帳日期
     await setDoc(doc(db, checkoutDate, barcode), {
         barcode: barcode,
         price: parseInt(price), // 確保價格為整數
@@ -246,7 +283,7 @@ async function updateBarcode(row, barcode, price, quantity) {
 
 // 更新總額
 function updateTotal() {
-    let table = document.getElementById("barcode_table");
+    let table = document.getElementById("barcodeTable");
     let tbody = table.getElementsByTagName("tbody")[0];
     let rows = tbody.getElementsByTagName("tr");
     let total = 0;
@@ -255,6 +292,6 @@ function updateTotal() {
         total += parseInt(row.cells[3].getElementsByTagName("span")[0].textContent);
     }
 
-    let totalCell = document.getElementById("total-cell");
+    let totalCell = document.getElementById("totalCell");
     totalCell.textContent = total;
 }
